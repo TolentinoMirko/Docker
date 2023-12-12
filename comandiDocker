@@ -1,0 +1,38 @@
+#Dentro il Dockerfile:
+FROM node:10-alpine
+WORKDIR /app
+COPY . .
+RUN yarn install --production
+CMD ["node", "/app/src/index.js"]
+
+docker ps   #per vedere tutti i container attivi
+
+docker image ls   #per vedere tutti gli immagini attivi
+
+docker run -dp 80:80 docker/getting-started:pwd   #per avviare il docker iniziale
+
+docker build -t docker-101 .   #per creare l'immagine numero 101
+
+docker run -dp 3000:3000 docker-101   #per avviare il docker numero 101
+
+docker rm -f <TUO_CONTAINER_ID>   #per rimuovere i container docker
+
+docker run -d ubuntu bash -c "shuf -i 1-10000 -n 1 -o /data.txt && tail -f /dev/null"   #creare un file di nome data.txt con un numero random da 1 a 10000
+
+docker volume create todo-db   #crea un volume(in questo caso si chiama todo-db) per conservare i dati
+
+docker run -dp 3000:3000 -v todo-db:/etc/todos docker-101   #crea un docler numero 101 che conserva i dati nel volume todo-db 
+
+docker network create todo-app #crea un network
+
+docker run -d \ #startiamo il container Mysql e gli attacchiamo il network
+    --network todo-app --network-alias mysql \
+    -v todo-mysql-data:/var/lib/mysql \
+    -e MYSQL_ROOT_PASSWORD=secret \
+    -e MYSQL_DATABASE=todos \
+    mysql:5.7
+
+docker run -dp 3000:3000 \   #Avvia in modo background e crea una mappatura dei porti
+    -w /app -v $PWD:/app \   #seleziona il "working directory" o la directory corrente che il comando avvierà da lì
+    node:10-alpine \   #è l'immagine da usare, però è l'immagine base per nostro app dal docker file
+    sh -c "yarn install && yarn run dev"
